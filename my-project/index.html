@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>免费云部署示例</title>
+    <style>
+        body { padding: 20px; font-family: Arial; }
+        .container { max-width: 500px; margin: 0 auto; }
+        input { width: 300px; padding: 8px; margin: 5px 0; }
+        button { padding: 8px 20px; background: #0070f3; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 10px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>查询用户信息</h2>
+        <input type="text" id="nameInput" placeholder="输入姓名查询">
+        <button onclick="queryData()">查询</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 调用后端接口的函数
+        async function queryData() {
+            const name = document.getElementById('nameInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!name) {
+                resultDiv.innerText = "请输入姓名！";
+                return;
+            }
+
+            try {
+                // 调用 Vercel 的 Serverless 接口
+                const response = await fetch(`/api/query-db?name=${encodeURIComponent(name)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerText = JSON.stringify(data.data, null, 2);
+                } else {
+                    resultDiv.innerText = "查询失败：" + data.message;
+                }
+            } catch (error) {
+                resultDiv.innerText = "网络错误：" + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
