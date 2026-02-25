@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 初始化 Supabase 客户端（替换为你的 URL 和 KEY）
-const supabaseUrl = "你的 SUPABASE_URL";
-const supabaseAnonKey = "你的 SUPABASE_ANON_KEY";
+const supabaseUrl = "https://zhlynogiflwfupkvrune.supabase.co";
+const supabaseAnonKey = "sb_publishable_Q8mIQ3u6oBxuFWHK0QjukA_U7MhR4DK";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // 后端接口的核心逻辑
@@ -41,4 +41,5 @@ export default async function handler(req, res) {
             message: error.message
         });
     }
+
 }
