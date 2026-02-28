@@ -2,47 +2,88 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>免费云部署示例</title>
+    <title>[Studyai]查询结果列表展示</title>
     <style>
+        /* 新增列表样式，让展示更美观 */
         body { padding: 20px; font-family: Arial; }
-        .container { max-width: 500px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; }
         input { width: 300px; padding: 8px; margin: 5px 0; }
-        button { padding: 8px 20px; background: #0070f3; color: white; border: none; cursor: pointer; }
-        #result { margin-top: 20px; padding: 10px; border: 1px solid #eee; }
+        button { padding: 8px 20px; background: #0070f3; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #eee; border-radius: 6px; }
+        /* 列表样式 */
+        .data-list { list-style: none; padding: 0; margin: 0; }
+        .data-item { padding: 10px; margin: 8px 0; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #0070f3; }
+        .data-item p { margin: 4px 0; color: #333; }
+        .empty-tip { color: #666; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>查询用户信息</h2>
-        <input type="text" id="nameInput" placeholder="输入姓名查询">
+        <input type="text" id="nameInput" placeholder="输入姓名查询（如 Cassie）">
         <button onclick="queryData()">查询</button>
         <div id="result"></div>
     </div>
 
     <script>
-        // 调用后端接口的函数
         async function queryData() {
             const name = document.getElementById('nameInput').value;
             const resultDiv = document.getElementById('result');
             
+            // 清空之前的结果
+            resultDiv.innerHTML = '';
+            
             if (!name) {
-                resultDiv.innerText = "请输入姓名！";
+                resultDiv.innerHTML = '<p class="empty-tip">请输入姓名！</p>';
                 return;
             }
 
             try {
-                // 调用 Vercel 的 Serverless 接口
                 const response = await fetch(`/api/query-db?name=${encodeURIComponent(name)}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `<p style="color: #dc2626;">请求失败（${response.status}）：${errorText}</p>`;
+                    return;
+                }
+
                 const data = await response.json();
                 
                 if (data.success) {
-                    resultDiv.innerText = JSON.stringify(data.data, null, 2);
+                    // 处理成功返回的数据，生成列表
+                    if (data.data.length === 0) {
+                        // 无数据时提示
+                        resultDiv.innerHTML = '<p class="empty-tip">未查询到匹配的用户数据</p>';
+                    } else {
+                        // 有数据时生成列表
+                        let listHtml = '<ul class="data-list">';
+                        // 遍历每一条数据，生成列表项
+                        data.data.forEach(item => {
+                            listHtml += `
+                                <li class="data-item">
+                                    <p><strong>ID：</strong>${item.id || '无'}</p>
+                                    <p><strong>姓名：</strong>${item.name || '无'}</p>
+                                    <p><strong>邮箱：</strong>${item.email || '无'}</p>
+                                    <p><strong>创建时间：</strong>${formatTime(item.created_at) || '无'}</p>
+                                </li>
+                            `;
+                        });
+                        listHtml += '</ul>';
+                        resultDiv.innerHTML = listHtml;
+                    }
                 } else {
-                    resultDiv.innerText = "查询失败：" + data.message;
+                    resultDiv.innerHTML = `<p style="color: #dc2626;">查询失败：${data.message}</p>`;
                 }
             } catch (error) {
-                resultDiv.innerText = "网络错误：" + error.message;
+                resultDiv.innerHTML = `<p style="color: #dc2626;">请求异常：${error.message}</p>`;
             }
+        }
+
+        // 辅助函数：格式化时间（可选，让时间更易读）
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const date = new Date(timeStr);
+            return date.toLocaleString('zh-CN'); // 转为本地时间格式，如 2026/2/28 10:01:01
         }
     </script>
 </body>
