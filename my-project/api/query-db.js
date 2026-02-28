@@ -25,8 +25,8 @@ export default async function handler(req, res) {
         // 查询 Supabase 数据库
         const { data, error } = await supabase
             .from('user_info')
-            .select('*')
-            .eq('name', name); // 按姓名精准查询
+            .select('*');
+            //.eq('name', name); // 按姓名精准查询
 
         if (error) throw error;
 
@@ -43,3 +43,4 @@ export default async function handler(req, res) {
     }
 
 }
+
